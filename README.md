@@ -1,5 +1,5 @@
 # Integradora
-Nombre del equipo: Los procrastinadores.
+Nombre del equipo: 404gang.
 Integrantes:
 - Gonzales Enríquez Estrella Guadalupe. (Alice)
 - Piña Acero Camila Michelle. (lider)
