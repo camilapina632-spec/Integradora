@@ -84,3 +84,29 @@ class Bibliotecarios:
                 conexionBD.conexion.rollback()
             print("Error al modificar bibliotecario:", e)
             return False
+
+    @classmethod
+    def existe_contrasena(cls, contrasena):
+        try:
+            cursor = conexionBD.cursor
+            sql = "SELECT 1 FROM bibliotecarios WHERE `contraseña` = %s LIMIT 1"
+            cursor.execute(sql, (contrasena,))
+            return cursor.fetchone() is not None
+        except Exception as e:
+            print("Error al verificar contraseña:", e)
+            return False
+
+    @classmethod
+    def verificar_acceso(cls, nombre, contrasena):
+        try:
+            cursor = conexionBD.cursor
+            sql = """SELECT id, nombre, apellido_paterno, apellido_materno, turno
+                     FROM bibliotecarios
+                     WHERE nombre = %s AND `contraseña` = %s
+                     LIMIT 1"""
+            cursor.execute(sql, (nombre, contrasena))
+            return cursor.fetchone()
+        except Exception as e:
+            print("Error al validar acceso:", e)
+            return None
+

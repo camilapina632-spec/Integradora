@@ -1,98 +1,73 @@
-
 import conexionBD
 
+
 class Prestamos:
-    def __init__(self, id_alumno, id_libro, id_bibliotecario,
-                 fechaPrestamo, fechaRetorno, horaSalida,
-                 horaReingreso, observaciones):
-
-        self._id_alumno = id_alumno
-        self._id_libro = id_libro
-        self._id_bibliotecario = id_bibliotecario
-        self._fechaPrestamo = fechaPrestamo
-        self._fechaRetorno = fechaRetorno
-        self._horaSalida = horaSalida
-        self._horaReingreso = horaReingreso
-        self._observaciones = observaciones
+    def __init__(self, alumno, libro, fecha_prestamo, fecha_retorno):
+        self._alumno = alumno
+        self._libro = libro
+        self._fecha_prestamo = fecha_prestamo
+        self._fecha_retorno = fecha_retorno
 
     @property
-    def id_alumno(self):
-        return self._id_alumno
+    def alumno(self):
+        return self._alumno
 
-    @id_alumno.setter
-    def id_alumno(self, valor):
-        self._id_alumno = valor
-
-    @property
-    def id_libro(self):
-        return self._id_libro
-
-    @id_libro.setter
-    def id_libro(self, valor):
-        self._id_libro = valor
+    @alumno.setter
+    def alumno(self, valor):
+        self._alumno = valor
 
     @property
-    def id_bibliotecario(self):
-        return self._id_bibliotecario
+    def libro(self):
+        return self._libro
 
-    @id_bibliotecario.setter
-    def id_bibliotecario(self, valor):
-        self._id_bibliotecario = valor
-
-    @property
-    def fechaPrestamo(self):
-        return self._fechaPrestamo
-
-    @fechaPrestamo.setter
-    def fechaPrestamo(self, valor):
-        self._fechaPrestamo = valor
+    @libro.setter
+    def libro(self, valor):
+        self._libro = valor
 
     @property
-    def fechaRetorno(self):
-        return self._fechaRetorno
+    def fecha_prestamo(self):
+        return self._fecha_prestamo
 
-    @fechaRetorno.setter
-    def fechaRetorno(self, valor):
-        self._fechaRetorno = valor
-
-    @property
-    def horaSalida(self):
-        return self._horaSalida
-
-    @horaSalida.setter
-    def horaSalida(self, valor):
-        self._horaSalida = valor
+    @fecha_prestamo.setter
+    def fecha_prestamo(self, valor):
+        self._fecha_prestamo = valor
 
     @property
-    def horaReingreso(self):
-        return self._horaReingreso
+    def fecha_retorno(self):
+        return self._fecha_retorno
 
-    @horaReingreso.setter
-    def horaReingreso(self, valor):
-        self._horaReingreso = valor
+    @fecha_retorno.setter
+    def fecha_retorno(self, valor):
+        self._fecha_retorno = valor
 
-    @property
-    def observaciones(self):
-        return self._observaciones
-
-    @observaciones.setter
-    def observaciones(self, valor):
-        self._observaciones = valor
+    @staticmethod
+    def _existe_referencia(tabla, id_valor):
+        cursor = conexionBD.cursor
+        cursor.execute(f"SELECT 1 FROM {tabla} WHERE id = %s LIMIT 1", (id_valor,))
+        return cursor.fetchone() is not None
 
     def insertar(self):
         try:
             cursor = conexionBD.cursor
             conexion = conexionBD.conexion
 
+            if not self._existe_referencia("alumnos", self.alumno):
+                print(f"Error: el alumno con id={self.alumno} no existe.")
+                return False
+
+            if not self._existe_referencia("libros", self.libro):
+                print(f"Error: el libro con id={self.libro} no existe.")
+                return False
+
             sql = """INSERT INTO prestamos
-            (id_alumno, id_libro, id_bibliotecario, fechaPrestamo,
-             fechaRetorno, horaSalida, horaReingreso, observaciones)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
+            (Alumno, Libro, fecha_prestamo, fecha_retorno)
+            VALUES (%s, %s, %s, %s)"""
 
             valores = (
-                self.id_alumno, self.id_libro, self.id_bibliotecario,
-                self.fechaPrestamo, self.fechaRetorno, self.horaSalida,
-                self.horaReingreso, self.observaciones
+                self.alumno,
+                self.libro,
+                self.fecha_prestamo,
+                self.fecha_retorno,
             )
 
             cursor.execute(sql, valores)
@@ -102,13 +77,18 @@ class Prestamos:
         except Exception as e:
             if getattr(conexionBD, "conexion", None):
                 conexionBD.conexion.rollback()
-            print("Error al insertar préstamo:", e)
+            print("Error al insertar préstamo (llave foránea o BD):", e)
             return False
 
     def consultar(self):
         try:
             cursor = conexionBD.cursor
-            cursor.execute("SELECT * FROM prestamos")
+            sql = """SELECT p.id, p.Alumno, p.Libro, p.fecha_prestamo, p.fecha_retorno,
+                      a.nombre AS nombre_alumno, l.autor AS autor_libro
+               FROM prestamos p
+               INNER JOIN alumnos a ON p.Alumno = a.id
+               INNER JOIN libros l ON p.Libro = l.id"""
+            cursor.execute(sql)
             return cursor.fetchall()
 
         except Exception as e:
@@ -121,7 +101,7 @@ class Prestamos:
             conexion = conexionBD.conexion
 
             cursor.execute(
-                "DELETE FROM prestamos WHERE id_prestamo = %s",
+                "DELETE FROM prestamos WHERE id = %s",
                 (id_prestamo,)
             )
             conexion.commit()
@@ -138,24 +118,35 @@ class Prestamos:
             cursor = conexionBD.cursor
             conexion = conexionBD.conexion
 
+            if not self._existe_referencia("alumnos", self.alumno):
+                print(f"Error: el alumno con id={self.alumno} no existe.")
+                return False
+
+            if not self._existe_referencia("libros", self.libro):
+                print(f"Error: el libro con id={self.libro} no existe.")
+                return False
+
             sql = """UPDATE prestamos SET
-            id_alumno=%s, id_libro=%s, id_bibliotecario=%s,
-            fechaPrestamo=%s, fechaRetorno=%s, horaSalida=%s,
-            horaReingreso=%s, observaciones=%s
-            WHERE id_prestamo=%s"""
+            Alumno = %s,
+            Libro = %s,
+            fecha_prestamo = %s,
+            fecha_retorno = %s
+            WHERE id = %s"""
 
             valores = (
-                self.id_alumno, self.id_libro, self.id_bibliotecario,
-                self.fechaPrestamo, self.fechaRetorno, self.horaSalida,
-                self.horaReingreso, self.observaciones, id_prestamo
+                self.alumno,
+                self.libro,
+                self.fecha_prestamo,
+                self.fecha_retorno,
+                id_prestamo,
             )
 
             cursor.execute(sql, valores)
             conexion.commit()
-            return cursor.rowcount >= 0
+            return cursor.rowcount > 0
 
         except Exception as e:
             if getattr(conexionBD, "conexion", None):
                 conexionBD.conexion.rollback()
-            print("Error al modificar préstamo:", e)
+            print("Error al modificar préstamo (llave foránea o BD):", e)
             return False

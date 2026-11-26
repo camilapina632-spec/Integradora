@@ -1,12 +1,21 @@
-
 import conexionBD
 
+
 class Alumnos:
-    def __init__(self, nombre, apellido1, apellido2, gradoGrupo, turno):
+    def __init__(
+        self,
+        nombre,
+        apellido_paterno,
+        apellido_materno,
+        grado,
+        grupo,
+        turno,
+    ):
         self._nombre = nombre
-        self._apellido1 = apellido1
-        self._apellido2 = apellido2
-        self._gradoGrupo = gradoGrupo
+        self._apellido_paterno = apellido_paterno
+        self._apellido_materno = apellido_materno
+        self._grado = grado
+        self._grupo = grupo
         self._turno = turno
 
     # Propiedades
@@ -19,28 +28,36 @@ class Alumnos:
         self._nombre = valor
 
     @property
-    def apellido1(self):
-        return self._apellido1
+    def apellido_paterno(self):
+        return self._apellido_paterno
 
-    @apellido1.setter
-    def apellido1(self, valor):
-        self._apellido1 = valor
-
-    @property
-    def apellido2(self):
-        return self._apellido2
-
-    @apellido2.setter
-    def apellido2(self, valor):
-        self._apellido2 = valor
+    @apellido_paterno.setter
+    def apellido_paterno(self, valor):
+        self._apellido_paterno = valor
 
     @property
-    def gradoGrupo(self):
-        return self._gradoGrupo
+    def apellido_materno(self):
+        return self._apellido_materno
 
-    @gradoGrupo.setter
-    def gradoGrupo(self, valor):
-        self._gradoGrupo = valor
+    @apellido_materno.setter
+    def apellido_materno(self, valor):
+        self._apellido_materno = valor
+
+    @property
+    def grado(self):
+        return self._grado
+
+    @grado.setter
+    def grado(self, valor):
+        self._grado = valor
+
+    @property
+    def grupo(self):
+        return self._grupo
+
+    @grupo.setter
+    def grupo(self, valor):
+        self._grupo = valor
 
     @property
     def turno(self):
@@ -57,12 +74,16 @@ class Alumnos:
             conexion = conexionBD.conexion
 
             sql = """INSERT INTO alumnos
-            (nombre, apellido1, apellido2, gradoGrupo, turno)
-            VALUES (%s, %s, %s, %s, %s)"""
+            (nombre, apellido_paterno, apellido_materno, grado, grupo, turno)
+            VALUES (%s, %s, %s, %s, %s, %s)"""
 
             valores = (
-                self.nombre, self.apellido1, self.apellido2,
-                self.gradoGrupo, self.turno
+                self.nombre,
+                self.apellido_paterno,
+                self.apellido_materno,
+                self.grado,
+                self.grupo,
+                self.turno,
             )
 
             cursor.execute(sql, valores)
@@ -109,17 +130,27 @@ class Alumnos:
             conexion = conexionBD.conexion
 
             sql = """UPDATE alumnos SET
-            nombre=%s, apellido1=%s, apellido2=%s,
-            gradoGrupo=%s, turno=%s WHERE id=%s"""
+            nombre = %s,
+            apellido_paterno = %s,
+            apellido_materno = %s,
+            grado = %s,
+            grupo = %s,
+            turno = %s
+            WHERE id = %s"""
 
             valores = (
-                self.nombre, self.apellido1, self.apellido2,
-                self.gradoGrupo, self.turno, id
+                self.nombre,
+                self.apellido_paterno,
+                self.apellido_materno,
+                self.grado,
+                self.grupo,
+                self.turno,
+                id,
             )
 
             cursor.execute(sql, valores)
             conexion.commit()
-            return cursor.rowcount >= 0
+            return cursor.rowcount > 0
 
         except Exception as e:
             if getattr(conexionBD, "conexion", None):

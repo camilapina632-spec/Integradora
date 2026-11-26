@@ -1,12 +1,11 @@
-
 import conexionBD
 
+
 class Libros:
-    def __init__(self, titulo, año_publicacion, autor, disponible, isbn):
+    def __init__(self, titulo, autor, anio_publicacion, isbn):
         self._titulo = titulo
-        self._año_publicacion = año_publicacion
         self._autor = autor
-        self._disponible = disponible
+        self._anio_publicacion = anio_publicacion
         self._isbn = isbn
 
     @property
@@ -18,14 +17,6 @@ class Libros:
         self._titulo = valor
 
     @property
-    def año_publicacion(self):
-        return self._año_publicacion
-
-    @año_publicacion.setter
-    def año_publicacion(self, valor):
-        self._año_publicacion = valor
-
-    @property
     def autor(self):
         return self._autor
 
@@ -34,12 +25,12 @@ class Libros:
         self._autor = valor
 
     @property
-    def disponible(self):
-        return self._disponible
+    def anio_publicacion(self):
+        return self._anio_publicacion
 
-    @disponible.setter
-    def disponible(self, valor):
-        self._disponible = valor
+    @anio_publicacion.setter
+    def anio_publicacion(self, valor):
+        self._anio_publicacion = valor
 
     @property
     def isbn(self):
@@ -55,12 +46,14 @@ class Libros:
             conexion = conexionBD.conexion
 
             sql = """INSERT INTO libros
-            (titulo, año_publicacion, autor, disponible, isbn)
-            VALUES (%s, %s, %s, %s, %s)"""
+            (titulo, autor, anio_publicacion, ISBN)
+            VALUES (%s, %s, %s, %s)"""
 
             valores = (
-                self.titulo, self.año_publicacion, self.autor,
-                self.disponible, self.isbn
+                self.titulo,
+                self.autor,
+                self.anio_publicacion,
+                self.isbn,
             )
 
             cursor.execute(sql, valores)
@@ -104,17 +97,23 @@ class Libros:
             conexion = conexionBD.conexion
 
             sql = """UPDATE libros SET
-            titulo=%s, año_publicacion=%s, autor=%s,
-            disponible=%s, isbn=%s WHERE id=%s"""
+            titulo = %s,
+            autor = %s,
+            anio_publicacion = %s,
+            ISBN = %s
+            WHERE id = %s"""
 
             valores = (
-                self.titulo, self.año_publicacion, self.autor,
-                self.disponible, self.isbn, id
+                self.titulo,
+                self.autor,
+                self.anio_publicacion,
+                self.isbn,
+                id,
             )
 
             cursor.execute(sql, valores)
             conexion.commit()
-            return cursor.rowcount >= 0
+            return cursor.rowcount > 0
 
         except Exception as e:
             if getattr(conexionBD, "conexion", None):
