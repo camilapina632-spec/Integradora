@@ -1,11 +1,10 @@
-
-from alumnos import alumnos
-from bibliotecarios import bibliotecarios
-from libros import libros
-from prestamos import prestamos
-
 import tkinter as tk
 from tkinter import ttk, messagebox
+
+from alumnos.alumnos import Alumnos
+from bibliotecarios.bibliotecarios import Bibliotecarios
+from libros.libros import Libros
+from prestamos.prestamos import Prestamos
 
 
 class App:
@@ -32,37 +31,37 @@ class App:
 
         configuraciones = {
             "Alumnos": {
-                "clase": alumnos.Alumnos,
+                "clase": Alumnos,
                 "campos": [
-                    "nombre", "apellido1", "apellido2",
-                    "gradoGrupo", "turno"
+                    "nombre", "apellido_paterno", "apellido_materno",
+                    "grado", "grupo", "turno"
                 ],
                 "id": "id"
             },
 
             "Bibliotecarios": {
-                "clase": bibliotecarios.Bibliotecarios,
-                "campos": ["nombre", "turno"],
+                "clase": Bibliotecarios,
+                "campos": [
+                    "nombre", "apellido_paterno", "apellido_materno",
+                    "turno", "contrasena"
+                ],
                 "id": "id"
             },
 
             "Libros": {
-                "clase": libros.Libros,
+                "clase": Libros,
                 "campos": [
-                    "titulo", "año_publicacion", "autor",
-                    "disponible", "isbn"
+                    "titulo", "autor", "anio_publicacion", "ISBN"
                 ],
                 "id": "id"
             },
 
             "Prestamos": {
-                "clase": prestamos.Prestamos,
+                "clase": Prestamos,
                 "campos": [
-                    "id_alumno", "id_libro", "id_bibliotecario",
-                    "fechaPrestamo", "fechaRetorno",
-                    "horaSalida", "horaReingreso", "observaciones"
+                    "alumno", "libro", "fecha_prestamo", "fecha_retorno"
                 ],
-                "id": "id_prestamo"
+                "id": "id"
             }
         }
 
@@ -201,7 +200,6 @@ class App:
 
         self.entradas = {}
 
-        # Campo para el identificador
         if incluir_id:
             tk.Label(
                 contenedor,
@@ -225,7 +223,6 @@ class App:
 
             self.entradas[self.identificador] = entrada_id
 
-        # Crear los campos correspondientes a cada tabla
         fila_inicial = 1 if incluir_id else 0
 
         for i, campo in enumerate(self.campos):
@@ -443,14 +440,12 @@ class App:
             font=("Arial", 20, "bold")
         ).pack(pady=15)
 
-        # Crear un objeto vacío para ejecutar consultar()
         objeto = self.crear_modelo(
             [""] * len(self.campos)
         )
 
         registros = objeto.consultar()
 
-        # Crear tabla
         marco = tk.Frame(self.ventana)
         marco.pack(
             fill="both",
@@ -504,7 +499,7 @@ class App:
             tabla.insert(
                 "",
                 "end",
-                values=registro
+                values=registro[:len(columnas)]
             )
 
         if not registros:
